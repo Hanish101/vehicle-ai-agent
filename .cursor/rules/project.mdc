@@ -1,0 +1,14 @@
+---
+description: OEM multistage chat agent conventions
+alwaysApply: true
+---
+
+# Project conventions
+
+- Four stages: Discover → Pipeline → Booking → Service. Stage transitions and tool allow-lists live in `src/agent/stages.ts`, not in the model prompt alone.
+- LLM: Groq (`openai/gpt-oss-120b`) primary; Gemini secondary fallback when Groq fails or is unset.
+- CRM writes only through Zod-validated tool handlers. Never call Zoho from the prompt or client.
+- `CRM_MODE=mock` must throw in production.
+- Keep `docs/*.md` in sync when stage rules, request path, or Zoho env change.
+- Secrets stay server-only. Never prefix LLM or Zoho keys with `NEXT_PUBLIC_`.
+- Do not log phone, email, booking ids, or registration numbers.

@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mahindra OEM chat agent (assessment demo)
 
-## Getting Started
+Four-stage automotive chat agent: **Discover → Pipeline → Booking → Service**.  
+Groq primary, Gemini fallback. Zoho CRM behind a swappable client (mock until credentials exist).
 
-First, run the development server:
+> Demo in an OEM voice (XUV700, Thar, Scorpio-N). Not an official Mahindra product.
+
+## Quick start
 
 ```bash
+cp .env.example .env.local
+# fill GROQ_API_KEY, SESSION_SECRET (npm run secret)
+# optional: GOOGLE_GENERATIVE_AI_API_KEY for fallback
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Default `CRM_MODE=mock`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Docs
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Architecture](docs/architecture.md)
+- [Stages](docs/stages.md)
+- [Session](docs/session.md)
+- [Zoho setup](docs/zoho-setup.md)
+- [Deploy on Google Cloud (Cloud Run)](docs/deploy-gcp.md)
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Next.js dev server |
+| `npm run secret` | Generate `SESSION_SECRET` |
+| `npm run seed:zoho` | Seed Zoho from `scripts/seed_data.json` |
+| `npm run secrets:check` | Block env files + secret pattern scan (also pre-commit) |
+| `npm run audit:check` | Production dependency CVE audit, high+ (also pre-commit) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Mock seeds
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Person | Use |
+|---|---|
+| Rajesh Sharma `+919800000001` | Discover / existing lead |
+| Priya Patel `+919800000002` | Pipeline deal (XUV700) |
+| Amit Verma / `MAH-9921` | Booking In Transit |
+| Sunil Rao / `MH04 AB 1234` | Service owner |
 
-## Deploy on Vercel
+## Security
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Never commit `.env` / `.env.local`. Husky + secretlint run on commit.
+- No `NEXT_PUBLIC_` for LLM or Zoho keys.
+- `CRM_MODE=mock` is refused in production.

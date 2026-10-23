@@ -1,0 +1,65 @@
+{
+  "contacts": [
+    {
+      "key": "priya",
+      "First_Name": "Priya",
+      "Last_Name": "Patel",
+      "Phone": "+919800000002",
+      "Email": "priya.patel@example.com",
+      "Mailing_City": "Pune"
+    },
+    {
+      "key": "amit",
+      "First_Name": "Amit",
+      "Last_Name": "Verma",
+      "Phone": "+919800000003",
+      "Email": "amit.verma@example.com",
+      "Mailing_City": "Bengaluru"
+    },
+    {
+      "key": "sunil",
+      "First_Name": "Sunil",
+      "Last_Name": "Rao",
+      "Phone": "+919800000004",
+      "Email": "sunil.rao@example.com",
+      "Mailing_City": "Mumbai",
+      "Description": "Owner: Mahindra Thar LX, reg MH04 AB 1234, delivered March 2025"
+    }
+  ],
+  "leads": [
+    {
+      "First_Name": "Rajesh",
+      "Last_Name": "Sharma",
+      "Phone": "+919800000001",
+      "Email": "rajesh.sharma@example.com",
+      "Vehicle_Model": "Thar",
+      "Preferred_City": "Mumbai",
+      "Lead_Source": "Chat"
+    }
+  ],
+  "deals": [
+    {
+      "contact": "priya",
+      "Deal_Name": "Priya Patel - XUV700",
+      "Stage": "Qualification",
+      "Amount": 1999000,
+      "Closing_Date": "2026-11-30",
+      "Vehicle_Model": "XUV700",
+      "Test_Drive_Time": "2026-10-28",
+      "Description": "Test drive scheduled for XUV700 AX7 at Mahindra Andheri. Quote: Rs 19.99 lakh ex-showroom."
+    },
+    {
+      "contact": "amit",
+      "Deal_Name": "Booking MAH-9921 - Scorpio-N Z8L",
+      "Stage": "Closed Won - Booking Done",
+      "Amount": 2215000,
+      "Closing_Date": "2026-10-15",
+      "Vehicle_Model": "Scorpio-N",
+      "Booking_ID": "MAH-9921",
+      "Allocation_Status": "In Transit",
+      "VIN": "MA1TA2XX9N2DEMO01",
+      "Balance_Payment_URL": "https://pay.demo.mahindra.local/balance/MAH-9921",
+      "Description": "Booking amount Rs 21,000 paid. VIN: MA1TA2XX9N2DEMO01. Balance_Payment_URL: https://pay.demo.mahindra.local/balance/MAH-9921"
+    }
+  ]
+}

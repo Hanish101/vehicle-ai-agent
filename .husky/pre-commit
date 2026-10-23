@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+set -e
+
+# 1) Block .env commits + scan for secret-like patterns
+npm run secrets:check
+
+# 2) Package vulnerability audit (production deps only; high+)
+#    Dev-only advisories (e.g. eslint tooling) do not block commits.
+#    Run `npm audit` manually for the full tree including devDependencies.
+npm run audit:check
