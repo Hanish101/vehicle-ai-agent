@@ -10,11 +10,20 @@ import {
 import { findUserById, type PublicUser } from "./users";
 
 export async function getCurrentUser(): Promise<PublicUser | null> {
-  const token = (await cookies()).get(USER_COOKIE)?.value;
+  const jar = await cookies();
+  const token = jar.get(USER_COOKIE)?.value;
   if (!token) return null;
   const userId = await verifyUserToken(token);
-  if (!userId) return null;
-  return findUserById(userId);
+  if (!userId) {
+    jar.delete(USER_COOKIE);
+    return null;
+  }
+  const user = await findUserById(userId);
+  if (!user) {
+    jar.delete(USER_COOKIE);
+    return null;
+  }
+  return user;
 }
 
 /** Copy the account onto the chat session so the bot can use name and email. */

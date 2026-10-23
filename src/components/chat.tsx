@@ -54,6 +54,7 @@ export function Chat() {
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
   const [dismissedCollect, setDismissedCollect] = useState<string | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const authRedirectRef = useRef(false);
 
   const transport = useMemo(
     () => new DefaultChatTransport({ api: "/api/chat" }),
@@ -70,10 +71,16 @@ export function Chat() {
 
   const refreshSession = useCallback(async () => {
     try {
-      const res = await fetch("/api/session");
+      const res = await fetch("/api/session", { credentials: "same-origin" });
       const data = await res.json();
       if (res.status === 401) {
-        window.location.assign("/login");
+        if (
+          !authRedirectRef.current &&
+          window.location.pathname !== "/login"
+        ) {
+          authRedirectRef.current = true;
+          window.location.replace("/login");
+        }
         return;
       }
       if (!res.ok) {

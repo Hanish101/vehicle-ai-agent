@@ -7,9 +7,6 @@ export async function proxy(request: NextRequest) {
   const userId = token ? await verifyUserToken(token) : null;
 
   if (pathname === "/login") {
-    if (userId) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
     return NextResponse.next();
   }
 
