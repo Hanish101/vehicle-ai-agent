@@ -27,7 +27,7 @@ Set these in **Project → Settings → Environment Variables** for **Production
 | `CRM_MODE` | Yes | `zoho` in production |
 | `GROQ_API_KEY` | One of LLM keys | Groq (first if set) |
 | `OPENROUTER_API_KEY` | One of LLM keys | [OpenRouter](https://openrouter.ai/keys) free tier; used when Groq unset |
-| `OPENROUTER_MODEL` | No | Default `meta-llama/llama-3.3-70b-instruct:free` |
+| `OPENROUTER_MODEL` | No | Default `meta-llama/llama-3.3-70b-instruct` |
 | `OPENROUTER_SITE_URL` | No | Production URL for OpenRouter rankings |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | No | Gemini fallback |
 | `ZOHO_CLIENT_ID` | Yes (if `zoho`) | OAuth |

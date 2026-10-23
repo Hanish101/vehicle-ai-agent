@@ -197,7 +197,7 @@ Implementation: `buildTools` in `src/agent/tools.ts` + `toolsForSession` in `src
 
 ## LLM
 
-- Order: Groq `openai/gpt-oss-120b` → OpenRouter (default `meta-llama/llama-3.3-70b-instruct:free`) → Gemini
+- Order: Groq `openai/gpt-oss-120b` → OpenRouter (default `meta-llama/llama-3.3-70b-instruct`) → Gemini
 - First keyed provider is primary; others used on request failure (`src/agent/model.ts`)
 
 ## Security

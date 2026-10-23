@@ -7,9 +7,8 @@ import type { LanguageModel } from "ai";
 export const GEMINI_MODEL = "gemini-3.5-flash";
 /** Free-tier Groq keys often lack Llama; this key exposes gpt-oss-120b. */
 export const GROQ_MODEL = "openai/gpt-oss-120b";
-/** OpenRouter `:free` models — override with OPENROUTER_MODEL. */
-export const OPENROUTER_MODEL_DEFAULT =
-  "meta-llama/llama-3.3-70b-instruct:free";
+/** Override with OPENROUTER_MODEL. */
+export const OPENROUTER_MODEL_DEFAULT = "meta-llama/llama-3.3-70b-instruct";
 
 export type LlmProvider = "gemini" | "groq" | "openrouter";
 

@@ -6,7 +6,7 @@ alwaysApply: true
 # Project conventions
 
 - Four stages: Discover → Pipeline → Booking → Service. Stage transitions and tool allow-lists live in `src/agent/stages.ts`, not in the model prompt alone.
-- LLM: Groq → OpenRouter (`:free` default) → Gemini; first keyed provider wins; others used on failover.
+- LLM: Groq → OpenRouter (`meta-llama/llama-3.3-70b-instruct` default) → Gemini; first keyed provider wins; others used on failover.
 - CRM writes only through Zod-validated tool handlers. Never call Zoho from the prompt or client.
 - `CRM_MODE=mock` must throw in production.
 - Keep `docs/*.md` in sync when stage rules, request path, or Zoho env change.

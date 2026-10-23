@@ -11,7 +11,7 @@ const root = join(here, "..");
 // Keep in sync with src/agent/model.ts
 const GEMINI_MODEL = "gemini-3.5-flash";
 const GROQ_MODEL = "openai/gpt-oss-120b";
-const OPENROUTER_MODEL_DEFAULT = "meta-llama/llama-3.3-70b-instruct:free";
+const OPENROUTER_MODEL_DEFAULT = "meta-llama/llama-3.3-70b-instruct";
 const TIMEOUT_MS = 20_000;
 
 function loadEnvFile(path) {
