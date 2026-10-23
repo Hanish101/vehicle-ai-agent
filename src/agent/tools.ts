@@ -197,28 +197,73 @@ export function buildTools(session: SessionData): ToolSet {
 
     createServiceCase: tool({
       description:
-        "Create a service case after registration, odometer, issue, and center are known.",
+        "Create a CRM service case only after registration, odometer, issue/service type, and preferred center are collected. Use session values; never guess.",
       inputSchema: z.object({
-        registrationNumber: z.string().min(4),
-        odometerKm: z.number().nonnegative(),
-        issueOrServiceType: z.string().min(2),
-        preferredCenter: z.string().min(2),
+        registrationNumber: z.string().optional(),
+        odometerKm: z.number().optional(),
+        issueOrServiceType: z.string().optional(),
+        preferredCenter: z.string().optional(),
         phone: z.string().optional(),
       }),
       execute: async (input) => {
         if (!allowed.has("createServiceCase")) {
           return {
             ok: false,
-            error: "createServiceCase is not allowed in this stage.",
+            error:
+              "createServiceCase is not allowed until registration, odometer, issue/service type, and preferred center are collected.",
+          };
+        }
+        const registrationNumber = realSlot(
+          input.registrationNumber,
+          session.registrationNumber,
+        );
+        const odometerKm = input.odometerKm ?? session.odometerKm;
+        const issueOrServiceType = realSlot(
+          input.issueOrServiceType,
+          session.issueOrServiceType,
+        );
+        const preferredCenter = realSlot(
+          input.preferredCenter,
+          session.preferredCenter,
+        );
+        const missing = [
+          !(registrationNumber && registrationNumber.length >= 4) &&
+            "registrationNumber",
+          !(odometerKm != null && odometerKm >= 0) && "odometerKm",
+          !(issueOrServiceType && issueOrServiceType.length >= 2) &&
+            "issueOrServiceType",
+          !(preferredCenter && preferredCenter.length >= 2) &&
+            "preferredCenter",
+        ].filter(Boolean);
+        if (missing.length) {
+          return {
+            ok: false,
+            error: `Missing service fields: ${missing.join(", ")}. Emit [[collect:service:...]] and ask the user — do not invent values.`,
           };
         }
         const result = await crm.createServiceCase({
-          ...input,
+          registrationNumber: registrationNumber!,
+          odometerKm: odometerKm!,
+          issueOrServiceType: issueOrServiceType!,
+          preferredCenter: preferredCenter!,
           contactId: session.contactId,
           phone: input.phone ?? session.phone,
         });
         if (result.ok && result.data.contactId) {
           session.contactId = result.data.contactId;
+        }
+        if (result.ok) {
+          const { id, registrationNumber: reg, preferredCenter: center } =
+            result.data;
+          return {
+            ok: true,
+            caseId: id,
+            registrationNumber: reg,
+            odometerKm: result.data.odometerKm,
+            issueOrServiceType: result.data.issueOrServiceType,
+            preferredCenter: center,
+            summary: `Service case ${id} is logged for ${reg} (${result.data.issueOrServiceType}) at ${center}.`,
+          };
         }
         return result;
       },
@@ -244,7 +289,14 @@ export function buildTools(session: SessionData): ToolSet {
       };
     case "Booking":
       return { lookupBooking: all.lookupBooking };
-    case "Service":
-      return { createServiceCase: all.createServiceCase };
+    case "Service": {
+      const serviceReady = Boolean(
+        session.registrationNumber &&
+          session.odometerKm != null &&
+          session.issueOrServiceType &&
+          session.preferredCenter,
+      );
+      return serviceReady ? { createServiceCase: all.createServiceCase } : {};
+    }
   }
 }

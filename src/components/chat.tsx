@@ -25,6 +25,10 @@ type SessionInfo = {
   hasEmail: boolean;
   bookingId: string | null;
   dealId: string | null;
+  registrationNumber: string | null;
+  odometerKm: number | null;
+  issueOrServiceType: string | null;
+  preferredCenter: string | null;
 };
 
 const SUGGESTIONS = [
@@ -132,6 +136,10 @@ export function Chat() {
     hasEmail: sessionInfo?.hasEmail,
     bookingId: sessionInfo?.bookingId,
     dealId: sessionInfo?.dealId,
+    registrationNumber: sessionInfo?.registrationNumber,
+    odometerKm: sessionInfo?.odometerKm,
+    issueOrServiceType: sessionInfo?.issueOrServiceType,
+    preferredCenter: sessionInfo?.preferredCenter,
   };
 
   const visibleRequest =

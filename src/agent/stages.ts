@@ -33,7 +33,20 @@ export function toolsForSession(session: {
   email?: string;
   city?: string;
   vehicle?: string;
+  registrationNumber?: string;
+  odometerKm?: number;
+  issueOrServiceType?: string;
+  preferredCenter?: string;
 }): ToolName[] {
+  if (session.stage === "Service") {
+    const ready = Boolean(
+      session.registrationNumber &&
+        session.odometerKm != null &&
+        session.issueOrServiceType &&
+        session.preferredCenter,
+    );
+    return ready ? ["createServiceCase"] : [];
+  }
   if (session.stage !== "Discover") return toolsForStage(session.stage);
   const ready = Boolean(
     session.name &&

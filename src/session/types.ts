@@ -23,6 +23,10 @@ export type SessionData = {
   demoDate?: string;
   /** HH:MM test-drive / demo clock time. */
   demoTime?: string;
+  registrationNumber?: string;
+  odometerKm?: number;
+  issueOrServiceType?: string;
+  preferredCenter?: string;
   pendingSlots?: string[];
   messages: ChatMessage[];
 };
@@ -50,6 +54,10 @@ export function wipeSessionSlots(session: SessionData): void {
   delete session.vehicle;
   delete session.demoDate;
   delete session.demoTime;
+  delete session.registrationNumber;
+  delete session.odometerKm;
+  delete session.issueOrServiceType;
+  delete session.preferredCenter;
   delete session.pendingSlots;
   delete session.userId;
   if (userId) {

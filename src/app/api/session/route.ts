@@ -23,6 +23,10 @@ export async function GET() {
       leadId: session.leadId ?? null,
       dealId: session.dealId ?? null,
       bookingId: session.bookingId ?? null,
+      registrationNumber: session.registrationNumber ?? null,
+      odometerKm: session.odometerKm ?? null,
+      issueOrServiceType: session.issueOrServiceType ?? null,
+      preferredCenter: session.preferredCenter ?? null,
     });
   } catch (err) {
     console.error(

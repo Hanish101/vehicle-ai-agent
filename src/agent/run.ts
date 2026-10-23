@@ -47,7 +47,13 @@ function hydrateSlotsFromUserText(session: SessionData, text: string) {
   const demoDate = text.match(/\bdemo date\s+(?:is\s+)?([^,.;]+)/i);
   const demoTime = text.match(/\bdemo time\s+(?:is\s+)?([^,.;]+)/i);
   const booking = text.match(/\bbooking\s+id\s+(?:is\s+)?([A-Za-z0-9-]+)/i);
+  const serviceFor = text.match(
+    /\bservice\s+for\s+([A-Za-z]{2}[\s-]?\d{2}[\s-]?[A-Za-z]{1,3}[\s-]?\d{4})\b/i,
+  );
   const reg = text.match(/\bregistration\s+(?:is\s+)?([A-Za-z0-9\s-]+?)(?=,|\.|$)/i);
+  const odometer = text.match(/\bodometer\s+(?:is\s+)?(\d+)/i);
+  const issue = text.match(/\bissue(?:\/service)?\s*:?\s*([^,.;]+)/i);
+  const center = text.match(/\bpreferred center\s+(?:is\s+)?([^,.;]+)/i);
 
   if (name?.[1] && !session.name) session.name = name[1].trim();
   if (phone?.[1] && !session.phone) {
@@ -60,11 +66,16 @@ function hydrateSlotsFromUserText(session: SessionData, text: string) {
   if (booking?.[1] && !session.bookingId) {
     session.bookingId = booking[1].trim().toUpperCase();
   }
-  if (reg?.[1] && !session.vehicle) {
-    session.pendingSlots = [
-      ...(session.pendingSlots || []).filter((s) => s !== "registration"),
-    ];
+  const regFromText = serviceFor?.[1] ?? reg?.[1];
+  if (regFromText) {
+    session.registrationNumber = regFromText.replace(/\s+/g, " ").trim().toUpperCase();
   }
+  if (odometer?.[1]) {
+    const km = Number(odometer[1]);
+    if (Number.isFinite(km) && km >= 0) session.odometerKm = km;
+  }
+  if (issue?.[1]) session.issueOrServiceType = issue[1].trim();
+  if (center?.[1]) session.preferredCenter = center[1].trim();
   if (!session.vehicle) {
     const model = vehicleNameFromText(text);
     if (model) session.vehicle = model;

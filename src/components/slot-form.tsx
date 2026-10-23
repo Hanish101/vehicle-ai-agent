@@ -30,6 +30,10 @@ type KnownSlots = {
   hasEmail?: boolean;
   bookingId?: string | null;
   dealId?: string | null;
+  registrationNumber?: string | null;
+  odometerKm?: number | null;
+  issueOrServiceType?: string | null;
+  preferredCenter?: string | null;
 };
 
 type Props = {
@@ -106,6 +110,10 @@ function alreadyKnown(key: SlotKey, known?: KnownSlots): boolean {
   if (key === "email") return Boolean(known.hasEmail);
   if (key === "bookingId") return Boolean(known.bookingId);
   if (key === "dealId") return Boolean(known.dealId);
+  if (key === "registrationNumber") return Boolean(known.registrationNumber);
+  if (key === "odometerKm") return known.odometerKm != null;
+  if (key === "issueOrServiceType") return Boolean(known.issueOrServiceType);
+  if (key === "preferredCenter") return Boolean(known.preferredCenter);
   return false;
 }
 

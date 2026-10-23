@@ -12,6 +12,15 @@ function missingLeadFields(session: SessionData): string[] {
   return missing;
 }
 
+function missingServiceFields(session: SessionData): string[] {
+  const missing: string[] = [];
+  if (!session.registrationNumber) missing.push("registrationNumber");
+  if (session.odometerKm == null) missing.push("odometerKm");
+  if (!session.issueOrServiceType) missing.push("issueOrServiceType");
+  if (!session.preferredCenter) missing.push("preferredCenter");
+  return missing;
+}
+
 export function buildSystemPrompt(session: SessionData): string {
   const tools = toolsForSession(session).join(", ");
   const known = [
@@ -26,11 +35,18 @@ export function buildSystemPrompt(session: SessionData): string {
     session.dealId && `dealId=${session.dealId}`,
     session.bookingId && `bookingId=${session.bookingId}`,
     session.contactId && `contactId=${session.contactId}`,
+    session.registrationNumber &&
+      `registrationNumber=${session.registrationNumber}`,
+    session.odometerKm != null && `odometerKm=${session.odometerKm}`,
+    session.issueOrServiceType &&
+      `issueOrServiceType=${session.issueOrServiceType}`,
+    session.preferredCenter && `preferredCenter=${session.preferredCenter}`,
   ]
     .filter(Boolean)
     .join("; ");
 
   const leadMissing = missingLeadFields(session);
+  const serviceMissing = missingServiceFields(session);
   // Real values for tool args only (never invent; never pass words like "set"/"collected").
   const leadToolValues = [
     session.name && `name=${session.name}`,
@@ -44,15 +60,28 @@ export function buildSystemPrompt(session: SessionData): string {
     .filter(Boolean)
     .join("; ");
 
+  const serviceToolValues = [
+    session.registrationNumber &&
+      `registrationNumber=${session.registrationNumber}`,
+    session.odometerKm != null && `odometerKm=${session.odometerKm}`,
+    session.issueOrServiceType &&
+      `issueOrServiceType=${session.issueOrServiceType}`,
+    session.preferredCenter && `preferredCenter=${session.preferredCenter}`,
+  ]
+    .filter(Boolean)
+    .join("; ");
+
   return `You are a helpful automotive OEM sales and service assistant for a Mahindra-style assessment demo.
 Speak in a clear Indian English OEM voice. Be concise. Never invent prices, VINs, booking records, or CRM data.
 
 Current stage: ${session.stage}
 ${session.userId ? `Signed-in customer: ${session.name ?? "unknown"}. Their email is on file. Address them by name and do not ask for name or email again.` : ""}
-Allowed tools this stage: ${tools || "(none — createLead unlocks only after name, phone, email, city, and vehicle are known)"}
+Allowed tools this stage: ${tools || (session.stage === "Service" ? "(none — createServiceCase unlocks only after registration, odometer, issue/service type, and preferred center are known)" : "(none — createLead unlocks only after name, phone, email, city, and vehicle are known)")}
 Already known slots (NEVER ask again for these): ${known || "none"}
 Lead fields still missing: ${leadMissing.length ? leadMissing.join(", ") : "none (complete)"}
 Lead values for createLead (use these exact strings when calling the tool; never pass placeholders like set/collected/on file): ${leadToolValues || "none yet — collect first"}
+Service fields still missing: ${serviceMissing.length ? serviceMissing.join(", ") : "none (complete)"}
+Service values for createServiceCase (use these exact values when calling the tool): ${serviceToolValues || "none yet — collect first"}
 
 Vehicle catalog (ONLY source of prices/features):
 ${catalogSummary()}
@@ -64,14 +93,14 @@ Conversation rules:
   • A question that needs one fact you lack (e.g. "is XUV available in my city?" when city is unknown) → ask ONLY for that field.
   • Pipeline lookup → phone and/or deal id (whichever missing).
   • Booking lookup → booking id and/or phone.
-  • Service case → only the service fields still missing.
+  • Service case → if any service field is missing, emit [[collect:service:...]] for those fields only (never invent odometer, issue, or center). createServiceCase unlocks only when all four are known.
 - Call createLead only when name, phone, email, city, and vehicle are all present (from user messages or the Lead values line). New test-drive / lead intent stays on Discover (createLead); do not treat it as Pipeline.
 - When the customer gives a demo date or clock time, pass that phrase as createLead testDriveTime. The server stores the date and time on the lead and on the signed-in user. Do not drop the time.
 - Pipeline updateFollowUp: pass dealId from lookupDeal. For a reschedule, ALWAYS set testDriveTime to the user’s date (e.g. "October 25th" or "2026-10-25") — backend writes Zoho Date field Test_Drive_Time. Also pass notes. After success, tell the user the new date (from tool testDriveTime). Stay on Pipeline.
 - Never say a lead/deal/booking/case was created, logged, or captured unless a tool just returned ok: true in this turn. If fields are missing, ask for them (or emit [[collect:...]]) — do not pretend the request was saved.
 - Booking status vocabulary ONLY: In Transit, Dispatch Pending, Delivered. Never fabricate records.
 - After lookupBooking: quote allocation status. If the tool result includes vin / balancePaymentUrl, quote those exact values. If they are missing, say they are not on the CRM booking record yet — never invent a VIN, never say a link “will be sent shortly” unless the tool returned that text.
-- Service interval questions → answer from the catalog service line first. Collect case fields / call createServiceCase only for a complaint or maintenance slot booking.
+- Service interval questions → answer from the catalog service line first. For a complaint or workshop visit, collect case fields then call createServiceCase. After success, reply in 2–3 plain sentences using the tool summary (case id, registration, center). Never paste raw JSON, tool payloads, or banner text with exclamation marks.
 - If a tool returns notFound, say so and ask one clarifying question.
 - Keep answers short (2–4 sentences) unless listing highlights.
 
@@ -85,6 +114,8 @@ Examples:
 - Availability question and city unknown → [[collect:lead:city]]
 - City already known → do not include city in the marker
 - Price-only question → NO marker at all
+- Service intent with only registration known → [[collect:service:odometerKm,issueOrServiceType,preferredCenter]]
+- Service intent with no registration → [[collect:service:registrationNumber,odometerKm,issueOrServiceType,preferredCenter]]
 
 Never emit a marker after a successful tool write, or for open-ended chat that does not need structured input.`;
 }
