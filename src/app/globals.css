@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #111111;
-  --muted: #737373;
-  --border: #e5e5e5;
+  /* Mahindra Red RGB 227, 24, 55 — published group palette */
+  --background: #f7f7f7;
+  --foreground: #1a1a1a;
+  --muted: #6b6b6b;
+  --border: #e8e8e8;
   --surface: #ffffff;
-  --accent: #dc2626;
-  --accent-hover: #b91c1c;
+  --accent: #e31837;
+  --accent-hover: #c41230;
+  --accent-soft: #fdecee;
 }
 
 @theme inline {
@@ -18,6 +20,7 @@
   --color-surface: var(--surface);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
   --font-sans: var(--font-sans);
 }
 
@@ -29,6 +32,83 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bar-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.accent-bar {
+  transform-origin: left center;
+  animation: bar-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.enter-up {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.enter-message {
+  animation: message-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger > * {
+  animation: rise-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 190ms;
+}
+
+.hover-lift {
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+.hover-lift:active {
+  transform: translateY(0) scale(0.99);
 }
 
 @keyframes typing-bounce {
@@ -49,7 +129,7 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  background: var(--muted);
+  background: var(--accent);
   animation: typing-bounce 1.05s ease-in-out infinite;
 }
 
@@ -59,4 +139,21 @@ body {
 
 .typing-dots span:nth-child(3) {
   animation-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accent-bar,
+  .enter-up,
+  .enter-message,
+  .stagger > *,
+  .typing-dots span {
+    animation: none;
+  }
+
+  .hover-lift,
+  .hover-lift:hover,
+  .hover-lift:active {
+    transform: none;
+    transition: none;
+  }
 }

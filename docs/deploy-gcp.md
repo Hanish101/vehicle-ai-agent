@@ -80,7 +80,7 @@ Open the service URL printed by the deploy command.
 
 1. Seed Zoho once from a trusted machine: `CRM_MODE=zoho` + keys in local `.env` → `npm run seed:zoho`.
 2. Confirm custom Lead/Deal fields are on the Zoho layout (`Vehicle_Model`, `Preferred_City`, booking fields).
-3. Smoke-test all four stages on the Cloud Run URL; use **Reset session** between scenarios.
+3. Smoke-test all four stages on the Cloud Run URL; use **New chat** between scenarios.
 
 ## Security notes
 

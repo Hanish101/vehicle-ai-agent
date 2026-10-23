@@ -5,6 +5,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Stage } from "@/session/types";
 import { logDev } from "@/lib/dev-log";
+import { BrandLogo } from "./brand-mark";
 import { MarkdownText } from "./markdown-text";
 import {
   filterMissingFields,
@@ -25,10 +26,10 @@ type SessionInfo = {
 };
 
 const SUGGESTIONS = [
-  "XUV700 ex-showroom price?",
-  "My deal — phone +919800000002",
-  "Booking MAH-9921 status",
-  "Service for MH04 AB 1234",
+  { title: "Discover", text: "XUV700 ex-showroom price?" },
+  { title: "Your deal", text: "My deal — phone +919800000002" },
+  { title: "Booking", text: "Booking MAH-9921 status" },
+  { title: "Service", text: "Service for MH04 AB 1234" },
 ];
 
 function textFromMessage(message: UIMessage): string {
@@ -158,14 +159,6 @@ export function Chat() {
     await resetSession();
   }
 
-  async function onResetSession() {
-    const ok = window.confirm(
-      "Reset session? This clears stage, saved name/phone/email, and CRM ids in this browser.",
-    );
-    if (!ok) return;
-    await resetSession();
-  }
-
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || busy) return;
@@ -197,56 +190,70 @@ export function Chat() {
   }
 
   return (
-    <div className="mx-auto flex h-[100dvh] w-full max-w-2xl flex-col bg-surface">
-      <header className="flex items-center justify-between border-b border-border px-4 py-3">
-        <div>
-          <h1 className="text-sm font-semibold tracking-tight">
-            Vehicle Assistant
+    <div className="flex h-[100dvh] flex-col bg-background">
+      <header className="shrink-0 border-b border-border bg-surface">
+        <div className="accent-bar h-1 bg-accent" aria-hidden="true" />
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-5 py-3">
+          <h1 className="min-w-0 leading-none">
+            <BrandLogo className="h-6 w-auto" />
           </h1>
-          <p className="text-xs text-muted">Stage: {stage}</p>
-        </div>
-        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => void onNewChat()}
             disabled={busy}
-            className="text-xs text-muted underline-offset-2 hover:text-foreground hover:underline disabled:opacity-50"
+            className="hover-lift shrink-0 rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-foreground hover:border-accent hover:text-accent disabled:opacity-50"
           >
             New chat
-          </button>
-          <button
-            type="button"
-            onClick={() => void onResetSession()}
-            disabled={busy}
-            className="text-xs text-muted underline-offset-2 hover:text-foreground hover:underline disabled:opacity-50"
-          >
-            Reset session
           </button>
         </div>
       </header>
 
-      <div ref={scrollerRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+      <div className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col p-3 sm:p-4">
+        <section
+          aria-label="Vehicle assistant"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
+        >
+          <div className="flex items-center justify-between border-b border-border px-5 py-3">
+            <p className="text-sm font-semibold tracking-tight">Vehicle assistant</p>
+            <span
+              key={stage}
+              className="enter-message shrink-0 rounded-full bg-accent-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-accent"
+            >
+              {stage}
+            </span>
+          </div>
+
+      <div ref={scrollerRef} className="flex-1 overflow-y-auto px-5 py-5">
         {messages.length === 0 && (
-          <div className="space-y-3 pt-8">
-            <p className="text-sm text-muted">
-              Ask about a model, your deal, a booking, or service.
+          <div className="enter-up flex min-h-full flex-col justify-center pb-8">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              How can we help?
+            </h2>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+              Ask about a model, your deal, a booking, or a service visit.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="stagger mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
               {SUGGESTIONS.map((s) => (
                 <button
-                  key={s}
+                  key={s.text}
                   type="button"
                   disabled={busy}
-                  onClick={() => void send(s)}
-                  className="rounded-full border border-border px-3 py-1.5 text-left text-xs text-foreground hover:bg-background disabled:opacity-50"
+                  onClick={() => void send(s.text)}
+                  className="hover-lift rounded-xl border border-border bg-surface px-3.5 py-3 text-left hover:border-accent hover:bg-accent-soft disabled:opacity-50"
                 >
-                  {s}
+                  <span className="block text-[11px] font-semibold uppercase tracking-wider text-accent">
+                    {s.title}
+                  </span>
+                  <span className="mt-1 block text-sm text-foreground">
+                    {s.text}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
         )}
 
+        <div className="space-y-3">
         {messages.map((m) => {
           const raw = textFromMessage(m);
           if (!raw) return null;
@@ -256,13 +263,13 @@ export function Chat() {
           return (
             <div
               key={m.id}
-              className={`flex ${mine ? "justify-end" : "justify-start"}`}
+              className={`enter-message flex ${mine ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                className={`max-w-[85%] px-3.5 py-2.5 text-sm leading-relaxed ${
                   mine
-                    ? "bg-foreground text-white"
-                    : "bg-background text-foreground"
+                    ? "rounded-2xl rounded-br-md bg-accent text-white"
+                    : "rounded-2xl rounded-bl-md border border-border bg-background text-foreground"
                 }`}
               >
                 <MarkdownText text={clean} />
@@ -272,7 +279,7 @@ export function Chat() {
         })}
 
         {busy && (
-          <div className="flex justify-start" aria-live="polite" aria-label="Assistant is typing">
+          <div className="enter-message flex justify-start" aria-live="polite" aria-label="Assistant is typing">
             <div className="rounded-2xl bg-background px-3.5 py-3">
               <div className="typing-dots flex items-center gap-1">
                 <span />
@@ -283,10 +290,12 @@ export function Chat() {
           </div>
         )}
 
+        </div>
+
         {error && !busy && (
           <div
             role="alert"
-            className="rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground"
+            className="enter-message rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground"
           >
             <p>We ran into a problem. Please try again.</p>
             <button
@@ -300,7 +309,7 @@ export function Chat() {
         )}
       </div>
 
-      <div className="border-t border-border px-4 py-3">
+      <div className="border-t border-border bg-surface px-5 py-4">
         {visibleRequest && lastAssistant && (
           <SlotForm
             request={visibleRequest}
@@ -314,24 +323,29 @@ export function Chat() {
           />
         )}
 
-        <form onSubmit={(e) => void onSubmit(e)} className="flex gap-2">
+        <form
+          onSubmit={(e) => void onSubmit(e)}
+          className="flex items-end gap-2 rounded-2xl border border-border bg-background p-2 transition-[border-color,box-shadow] duration-200 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15"
+        >
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onComposerKeyDown}
-            rows={2}
-            placeholder="Type a message…"
-            className="flex-1 resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-foreground/30"
+            rows={1}
+            placeholder="Type a message"
+            className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted"
             disabled={busy}
           />
           <button
             type="submit"
             disabled={busy || !input.trim()}
-            className="self-end rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-40"
+            className="shrink-0 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-accent-hover active:scale-[0.98] disabled:bg-border disabled:text-muted disabled:active:scale-100"
           >
             Send
           </button>
         </form>
+      </div>
+        </section>
       </div>
     </div>
   );

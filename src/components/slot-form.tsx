@@ -175,7 +175,7 @@ export function SlotForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-3 rounded-xl border border-border bg-background p-3"
+      className="enter-up mb-3 rounded-2xl border border-border bg-background p-3.5"
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="text-sm font-medium">
@@ -206,7 +206,7 @@ export function SlotForm({
                 onChange={(e) => set(key, e.target.value)}
                 placeholder={meta.placeholder}
                 disabled={busy}
-                className="rounded-lg border border-border bg-surface px-2.5 py-2 text-sm outline-none focus:border-foreground/30"
+                className="rounded-lg border border-border bg-surface px-2.5 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               />
             </label>
           );
@@ -216,7 +216,7 @@ export function SlotForm({
       <button
         type="submit"
         disabled={busy || !buildMessage()}
-        className="mt-3 w-full rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-40"
+        className="mt-3 w-full rounded-xl bg-accent px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:bg-border disabled:text-muted"
       >
         Continue
       </button>

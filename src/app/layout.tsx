@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const sans = Geist({
+const sans = Outfit({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Vehicle Assistant",
-  description: "Chat for vehicle discovery, deals, bookings, and service",
+  title: "Mahindra Vehicle Assistant",
+  description:
+    "Product demo for Mahindra vehicle discovery, deals, bookings, and service",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

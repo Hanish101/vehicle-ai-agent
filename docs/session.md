@@ -25,7 +25,6 @@ Signed httpOnly cookie via `iron-session` (`src/session/cookie.ts`).
 ## UI
 
 - **New chat** — clears the thread and resets the cookie (stage + slots).
-- **Reset session** — same wipe, with a confirm dialog (use between demo scenarios).
 - Reset **deletes** phone/name/email/CRM ids (not only overwrites `stage`). Reload after reset if the badge still looks stale.
 
 No Redis. State survives refresh because it lives on the cookie.
