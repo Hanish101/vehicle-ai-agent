@@ -1,7 +1,7 @@
 # Mahindra OEM chat agent (assessment demo)
 
 Four-stage automotive chat agent: **Discover → Pipeline → Booking → Service**.  
-Groq primary, Gemini fallback. Zoho CRM behind a swappable client (mock until credentials exist).
+LLM: Groq → OpenRouter (free tier) → Gemini. Zoho CRM behind a swappable client (mock until credentials exist).
 
 > Demo in an OEM voice (XUV700, Thar, Scorpio-N). Not an official Mahindra product.
 
@@ -9,7 +9,7 @@ Groq primary, Gemini fallback. Zoho CRM behind a swappable client (mock until cr
 
 ```bash
 cp .env.example .env.local
-# fill GROQ_API_KEY, SESSION_SECRET (npm run secret)
+# fill OPENROUTER_API_KEY or GROQ_API_KEY, SESSION_SECRET (npm run secret), MONGODB_URI
 # optional: GOOGLE_GENERATIVE_AI_API_KEY for fallback
 npm install
 npm run dev
@@ -23,7 +23,8 @@ Open [http://localhost:3000](http://localhost:3000). Default `CRM_MODE=mock`.
 - [Stages](docs/stages.md)
 - [Session](docs/session.md)
 - [Zoho setup](docs/zoho-setup.md)
-- [Deploy on Google Cloud (Cloud Run)](docs/deploy-gcp.md)
+- [Deploy on Vercel](docs/deploy-vercel.md) (recommended)
+- [Deploy on Google Cloud (Cloud Run)](docs/deploy-gcp.md) (optional container)
 
 ## Scripts
 

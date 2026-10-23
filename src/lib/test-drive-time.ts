@@ -25,12 +25,23 @@ const MONTHS: Record<string, number> = {
   dec: 12,
 };
 
+/** One line stored on the lead and the user account. */
+export function demoScheduleLine(date?: string, time?: string): string {
+  const parts = [
+    date && `Demo date: ${date}`,
+    time && `Demo time: ${time}`,
+  ].filter(Boolean);
+  return parts.join("; ");
+}
+
 /**
  * Normalize follow-up time for Zoho Date field Test_Drive_Time (YYYY-MM-DD).
- * Clock time stays in the note / Description.
+ * Clock time is returned separately so it can be stored, not only mentioned in a note.
  */
 export function normalizeTestDriveTime(input: string): {
   date?: string;
+  /** 24-hour clock `HH:MM` when the user gave a time. */
+  time?: string;
   note: string;
 } {
   const raw = input.trim();
@@ -42,7 +53,8 @@ export function normalizeTestDriveTime(input: string): {
 
   if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) {
     const date = raw.slice(0, 10);
-    return { date, note: `Follow-up preference: ${raw}` };
+    const time = raw.match(/T(\d{2}:\d{2})/)?.[1];
+    return { date, time, note: `Follow-up preference: ${raw}` };
   }
 
   const lower = raw.toLowerCase();
@@ -116,16 +128,18 @@ function formatResult(
   timeMatch: RegExpMatchArray | null,
   hours: number,
   minutes: number,
-): { date: string; note: string } {
+): { date: string; time?: string; note: string } {
   const y = target.getUTCFullYear();
   const m = String(target.getUTCMonth() + 1).padStart(2, "0");
   const d = String(target.getUTCDate()).padStart(2, "0");
   const date = `${y}-${m}-${d}`;
   const hh = String(hours).padStart(2, "0");
   const mm = String(minutes).padStart(2, "0");
-  const timeLabel = timeMatch ? `${hh}:${mm} IST` : "";
+  const time = timeMatch ? `${hh}:${mm}` : undefined;
+  const timeLabel = time ? `${time} IST` : "";
   return {
     date,
+    time,
     note: timeLabel
       ? `Follow-up preference: ${raw} → ${date} ${timeLabel}`
       : `Follow-up preference: ${raw} → ${date}`,

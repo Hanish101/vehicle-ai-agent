@@ -20,6 +20,8 @@ export function buildSystemPrompt(session: SessionData): string {
     session.email && `email=collected`,
     session.city && `city=${session.city}`,
     session.vehicle && `vehicle=${session.vehicle}`,
+    session.demoDate && `demoDate=${session.demoDate}`,
+    session.demoTime && `demoTime=${session.demoTime}`,
     session.leadId && `leadId=${session.leadId}`,
     session.dealId && `dealId=${session.dealId}`,
     session.bookingId && `bookingId=${session.bookingId}`,
@@ -36,6 +38,8 @@ export function buildSystemPrompt(session: SessionData): string {
     session.email && `email=${session.email}`,
     session.city && `city=${session.city}`,
     session.vehicle && `vehicleModel=${session.vehicle}`,
+    session.demoDate && `demoDate=${session.demoDate}`,
+    session.demoTime && `demoTime=${session.demoTime}`,
   ]
     .filter(Boolean)
     .join("; ");
@@ -44,6 +48,7 @@ export function buildSystemPrompt(session: SessionData): string {
 Speak in a clear Indian English OEM voice. Be concise. Never invent prices, VINs, booking records, or CRM data.
 
 Current stage: ${session.stage}
+${session.userId ? `Signed-in customer: ${session.name ?? "unknown"}. Their email is on file. Address them by name and do not ask for name or email again.` : ""}
 Allowed tools this stage: ${tools || "(none — createLead unlocks only after name, phone, email, city, and vehicle are known)"}
 Already known slots (NEVER ask again for these): ${known || "none"}
 Lead fields still missing: ${leadMissing.length ? leadMissing.join(", ") : "none (complete)"}
@@ -61,6 +66,7 @@ Conversation rules:
   • Booking lookup → booking id and/or phone.
   • Service case → only the service fields still missing.
 - Call createLead only when name, phone, email, city, and vehicle are all present (from user messages or the Lead values line). New test-drive / lead intent stays on Discover (createLead); do not treat it as Pipeline.
+- When the customer gives a demo date or clock time, pass that phrase as createLead testDriveTime. The server stores the date and time on the lead and on the signed-in user. Do not drop the time.
 - Pipeline updateFollowUp: pass dealId from lookupDeal. For a reschedule, ALWAYS set testDriveTime to the user’s date (e.g. "October 25th" or "2026-10-25") — backend writes Zoho Date field Test_Drive_Time. Also pass notes. After success, tell the user the new date (from tool testDriveTime). Stay on Pipeline.
 - Never say a lead/deal/booking/case was created, logged, or captured unless a tool just returned ok: true in this turn. If fields are missing, ask for them (or emit [[collect:...]]) — do not pretend the request was saved.
 - Booking status vocabulary ONLY: In Transit, Dispatch Pending, Delivered. Never fabricate records.
@@ -72,10 +78,10 @@ Conversation rules:
 UI collect markers (emit at most one, only when a form is truly needed):
 Format: [[collect:KIND:field1,field2]]
 Kinds: lead | pipeline | booking | service
-Allowed fields: name, phone, email, city, dealId, bookingId, registrationNumber, odometerKm, issueOrServiceType, preferredCenter
+Allowed fields: name, phone, email, city, demoDate, demoTime, dealId, bookingId, registrationNumber, odometerKm, issueOrServiceType, preferredCenter
 
 Examples:
-- Test-drive intent and missing name+phone+email+city → [[collect:lead:name,phone,email,city]]
+- Test-drive intent and missing name+phone+email+city → [[collect:lead:name,phone,email,city,demoDate,demoTime]]
 - Availability question and city unknown → [[collect:lead:city]]
 - City already known → do not include city in the marker
 - Price-only question → NO marker at all

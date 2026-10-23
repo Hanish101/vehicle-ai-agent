@@ -19,6 +19,8 @@ type SessionInfo = {
   vehicle: string | null;
   city: string | null;
   name: string | null;
+  demoDate: string | null;
+  demoTime: string | null;
   hasPhone: boolean;
   hasEmail: boolean;
   bookingId: string | null;
@@ -26,7 +28,7 @@ type SessionInfo = {
 };
 
 const SUGGESTIONS = [
-  { title: "Discover", text: "XUV700 ex-showroom price?" },
+  { title: "Discover", text: "XUV 3XO specs and price?" },
   { title: "Your deal", text: "My deal — phone +919800000002" },
   { title: "Booking", text: "Booking MAH-9921 status" },
   { title: "Service", text: "Service for MH04 AB 1234" },
@@ -70,6 +72,10 @@ export function Chat() {
     try {
       const res = await fetch("/api/session");
       const data = await res.json();
+      if (res.status === 401) {
+        window.location.assign("/login");
+        return;
+      }
       if (!res.ok) {
         logDev("Session load failed (dev build — hidden from UI)", data);
         return;
@@ -159,6 +165,15 @@ export function Chat() {
     await resetSession();
   }
 
+  async function signOut() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      logDev("Sign out failed (dev build — hidden from UI)", err);
+    }
+    window.location.assign("/login");
+  }
+
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || busy) return;
@@ -197,14 +212,28 @@ export function Chat() {
           <h1 className="min-w-0 leading-none">
             <BrandLogo className="h-6 w-auto" />
           </h1>
-          <button
-            type="button"
-            onClick={() => void onNewChat()}
-            disabled={busy}
-            className="hover-lift shrink-0 rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-foreground hover:border-accent hover:text-accent disabled:opacity-50"
-          >
-            New chat
-          </button>
+          <div className="flex shrink-0 items-center gap-3">
+            {sessionInfo?.name && (
+              <span className="max-w-[10rem] truncate text-xs text-muted">
+                {sessionInfo.name}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => void onNewChat()}
+              disabled={busy}
+              className="hover-lift rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-foreground hover:border-accent hover:text-accent disabled:opacity-50"
+            >
+              New chat
+            </button>
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="text-xs text-muted hover:text-foreground"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 
@@ -214,7 +243,16 @@ export function Chat() {
           className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
         >
           <div className="flex items-center justify-between border-b border-border px-5 py-3">
-            <p className="text-sm font-semibold tracking-tight">Vehicle assistant</p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold tracking-tight">Vehicle assistant</p>
+              {(sessionInfo?.demoDate || sessionInfo?.demoTime) && (
+                <p className="truncate text-xs text-muted">
+                  Demo
+                  {sessionInfo.demoDate ? ` ${sessionInfo.demoDate}` : ""}
+                  {sessionInfo.demoTime ? ` · ${sessionInfo.demoTime}` : ""}
+                </p>
+              )}
+            </div>
             <span
               key={stage}
               className="enter-message shrink-0 rounded-full bg-accent-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-accent"

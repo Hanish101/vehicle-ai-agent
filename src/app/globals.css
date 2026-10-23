@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  /* Mahindra Red RGB 227, 24, 55 — published group palette */
-  --background: #f7f7f7;
+  /* Mahindra site warm canvas + Rising Red */
+  --background: #f7f5ef;
   --foreground: #1a1a1a;
-  --muted: #6b6b6b;
-  --border: #e8e8e8;
-  --surface: #ffffff;
+  --muted: #6b665c;
+  --border: #e6e1d6;
+  --surface: #fffdf9;
   --accent: #e31837;
   --accent-hover: #c41230;
-  --accent-soft: #fdecee;
+  --accent-soft: #fae8ec;
 }
 
 @theme inline {

@@ -1,6 +1,6 @@
 # Host on Google Cloud (Cloud Run)
 
-Recommended path for this Next.js App Router app: **Cloud Run** (container). Do not use `CRM_MODE=mock` in production — the app refuses it.
+Optional **container** deploy (Docker). For **Vercel**, use [deploy-vercel.md](deploy-vercel.md). Do not use `CRM_MODE=mock` in production — the app refuses it.
 
 ## Prerequisites
 
@@ -49,7 +49,9 @@ Set secrets as env vars (prefer [Secret Manager](https://cloud.google.com/secret
 | Env | Notes |
 |---|---|
 | `CRM_MODE` | `zoho` (required in production) |
-| `SESSION_SECRET` | ≥32 chars |
+| `SESSION_SECRET` | ≥32 chars. Signs the chat cookie and the user cookie |
+| `MONGODB_URI` | Account database. Do not commit credentials |
+| `MONGODB_DB` | Optional. Defaults to `mahindra` |
 | `GROQ_API_KEY` | Primary LLM |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Optional fallback |
 | `ZOHO_CLIENT_ID` / `ZOHO_CLIENT_SECRET` / `ZOHO_REFRESH_TOKEN` | OAuth |
@@ -84,7 +86,7 @@ Open the service URL printed by the deploy command.
 
 ## Security notes
 
-- Chat has **no login**. Anyone with the URL can create Leads/Cases in your Zoho org. Prefer `--no-allow-unauthenticated` plus IAP / identity, or keep the URL private for the assessment demo only.
+- Sign-in is required. Accounts are stored in MongoDB. Anyone who can register can still create Leads/Cases in your Zoho org, so keep the URL private for the assessment demo or put Identity-Aware Proxy in front of Cloud Run.
 - Never bake `.env` into the image (`.dockerignore` excludes it).
 - In-memory rate limits reset per instance; fine for a demo, not multi-user production hardening.
 

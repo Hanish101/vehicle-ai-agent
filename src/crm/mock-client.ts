@@ -143,7 +143,11 @@ export function createMockClient(): CrmClient {
   return {
     async createLead(input: LeadInput) {
       const existing = leads.find((l) => phonesMatch(l.phone, input.phone));
-      if (existing) return ok(existing);
+      if (existing) {
+        if (input.demoDate) existing.demoDate = input.demoDate;
+        if (input.demoTime) existing.demoTime = input.demoTime;
+        return ok(existing);
+      }
       const record: LeadRecord = {
         id: `lead-new-${leadSeq++}`,
         ...input,

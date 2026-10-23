@@ -1,6 +1,16 @@
 # Stages
 
-Session fields: `stage`, `leadId`, `dealId`, `bookingId`, `contactId`, `phone`, `name`, `email`, `city`, `vehicle`, `pendingSlots`, `messages`.
+Four-stage flow: **Discover → Pipeline → Booking → Service**. Rules and diagrams are in [Architecture](architecture.md#four-stages). This page is a short reference.
+
+## Session fields used across stages
+
+`stage`, `userId`, `leadId`, `dealId`, `bookingId`, `contactId`, `phone`, `name`, `email`, `city`, `vehicle`, `demoDate`, `demoTime`, `pendingSlots`, `messages`.
+
+After login, `name` and `email` usually come from MongoDB; the agent still collects phone, city, and vehicle for a new lead.
+
+## Transitions
+
+Keyword-based switches in `src/agent/stages.ts` (`detectStageSwitch`). If nothing matches, stage unchanged.
 
 ```mermaid
 stateDiagram-v2
@@ -15,45 +25,22 @@ stateDiagram-v2
   Pipeline --> Service: service intent
 ```
 
-Ambiguous turns stay on the current stage and ask one clarifying question. Explicit customer intent can switch stage.
+## Per stage (summary)
 
-## Discover
+| Stage | Goal | Tools |
+|---|---|---|
+| **Discover** | Catalog Q&A; create lead + demo schedule when slots complete | `createLead` |
+| **Pipeline** | Find deal; reschedule / notes | `lookupDeal`, `updateFollowUp` |
+| **Booking** | Allocation, VIN, balance URL from CRM | `lookupBooking` |
+| **Service** | Open service case | `createServiceCase` |
 
-- Triggers: model, price, features, new test-drive request, unknown customer.
-- Tools: `createLead` (only after name, phone, email, city).
-- Zoho: create Lead; vehicle in `ZOHO_VEHICLE_FIELD` (default `Vehicle_Model`).
-- Prices only from `src/catalog/vehicles.ts` (XUV700, Thar, Scorpio-N).
-- New “book a test drive” stays here so lead fields can be collected.
+## Mock / seed pointers
 
-## Pipeline
-
-- Triggers: phone or deal context, quotation, dealer, my deal, follow-up (existing prospect).
-- Tools: `lookupDeal`, `updateFollowUp`.
-- Zoho: search/update Deals (follow-up notes append to Description).
-- Seed: Priya Patel, XUV700, phone `+919800000002`.
-
-## Booking
-
-- Triggers: booking id (e.g. `MAH-9921`) or phone, delivery, VIN, balance.
-- Tools: `lookupBooking`.
-- Status vocabulary only: `In Transit`, `Dispatch Pending`, `Delivered`.
-- Quote VIN and balance payment URL only from CRM fields on the booking deal.
-- If neither id matches, ask for the other. Never fabricate.
-- Seed: Amit Verma / `MAH-9921`, Allocation_Status `In Transit`, demo `VIN` + `Balance_Payment_URL`.
-
-## Service
-
-- Triggers: complaint, service interval, maintenance slot.
-- Tools: `createServiceCase` after registration, odometer, issue/service type, preferred center.
-- Interval Q&A uses catalog facts first; open a case only for slot/complaint.
-- Zoho: Cases linked to Contact.
-- Seed owner: Sunil Rao, reg `MH04 AB 1234`.
-
-## Tool allow-list
-
-| Stage | Tools |
+| Stage | Try in chat |
 |---|---|
-| Discover | `createLead` |
-| Pipeline | `lookupDeal`, `updateFollowUp` |
-| Booking | `lookupBooking` |
-| Service | `createServiceCase` |
+| Discover | “XUV700 ex-showroom price?” then lead flow |
+| Pipeline | “My deal — phone +919800000002” |
+| Booking | “Booking MAH-9921 status” |
+| Service | “Service for MH04 AB 1234” |
+
+Use **New chat** between scenarios; account stays signed in.

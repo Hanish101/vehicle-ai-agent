@@ -9,6 +9,8 @@ export type SlotKey =
   | "phone"
   | "email"
   | "city"
+  | "demoDate"
+  | "demoTime"
   | "dealId"
   | "bookingId"
   | "registrationNumber"
@@ -53,6 +55,8 @@ const FIELD_META: Record<
   phone: { label: "Phone", type: "tel", placeholder: "+91…" },
   email: { label: "Email", type: "email", placeholder: "you@example.com" },
   city: { label: "City", placeholder: "Your city" },
+  demoDate: { label: "Demo date", placeholder: "27 Oct 2026" },
+  demoTime: { label: "Demo time", placeholder: "10:00 am" },
   dealId: { label: "Deal ID", placeholder: "Optional", optional: true },
   bookingId: { label: "Booking ID", placeholder: "e.g. MAH-9921", optional: true },
   registrationNumber: {
@@ -72,6 +76,8 @@ const ALLOWED: SlotKey[] = [
   "phone",
   "email",
   "city",
+  "demoDate",
+  "demoTime",
   "dealId",
   "bookingId",
   "registrationNumber",
@@ -144,6 +150,8 @@ export function SlotForm({
       else if (key === "phone") parts.push(`phone ${v}`);
       else if (key === "email") parts.push(`email ${v}`);
       else if (key === "city") parts.push(`city ${v}`);
+      else if (key === "demoDate") parts.push(`demo date ${v}`);
+      else if (key === "demoTime") parts.push(`demo time ${v}`);
       else if (key === "dealId") parts.push(`deal id ${v}`);
       else if (key === "bookingId") parts.push(`booking id ${v}`);
       else if (key === "registrationNumber") parts.push(`registration ${v}`);

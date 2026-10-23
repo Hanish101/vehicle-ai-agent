@@ -14,9 +14,14 @@ import {
 import { buildSystemPrompt } from "./prompt";
 import { buildTools } from "./tools";
 import { applyStageFromUserText } from "./stages";
-import { resolveFallbackModel, resolveModel } from "./model";
+import {
+  resolveFallbackModel,
+  resolveModel,
+  type LlmProvider,
+} from "./model";
 import type { SessionData } from "@/session/types";
 import { trimMessages } from "@/session/cookie";
+import { vehicleNameFromText } from "@/catalog/vehicles";
 
 function lastUserText(messages: UIMessage[]): string {
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -39,6 +44,8 @@ function hydrateSlotsFromUserText(session: SessionData, text: string) {
     /\bemail\s+(?:is\s+)?([\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/i,
   );
   const city = text.match(/\bcity\s+(?:is\s+)?([^,.;]+)/i);
+  const demoDate = text.match(/\bdemo date\s+(?:is\s+)?([^,.;]+)/i);
+  const demoTime = text.match(/\bdemo time\s+(?:is\s+)?([^,.;]+)/i);
   const booking = text.match(/\bbooking\s+id\s+(?:is\s+)?([A-Za-z0-9-]+)/i);
   const reg = text.match(/\bregistration\s+(?:is\s+)?([A-Za-z0-9\s-]+?)(?=,|\.|$)/i);
 
@@ -48,6 +55,8 @@ function hydrateSlotsFromUserText(session: SessionData, text: string) {
   }
   if (email?.[1] && !session.email) session.email = email[1].trim();
   if (city?.[1] && !session.city) session.city = city[1].trim();
+  if (demoDate?.[1]) session.demoDate = demoDate[1].trim();
+  if (demoTime?.[1]) session.demoTime = demoTime[1].trim();
   if (booking?.[1] && !session.bookingId) {
     session.bookingId = booking[1].trim().toUpperCase();
   }
@@ -57,9 +66,8 @@ function hydrateSlotsFromUserText(session: SessionData, text: string) {
     ];
   }
   if (!session.vehicle) {
-    if (/\bxuv700\b/i.test(text)) session.vehicle = "XUV700";
-    else if (/\bthar\b/i.test(text)) session.vehicle = "Thar";
-    else if (/\bscorpio-?n\b/i.test(text)) session.vehicle = "Scorpio-N";
+    const model = vehicleNameFromText(text);
+    if (model) session.vehicle = model;
   }
 }
 
@@ -127,7 +135,7 @@ async function runFallbackText(options: {
   tools: ReturnType<typeof buildTools>;
   writer: { write: (chunk: UIMessageChunk) => void };
   stage: SessionData["stage"];
-  provider: "gemini" | "groq";
+  provider: LlmProvider;
 }) {
   const result = await generateText({
     model: options.model,

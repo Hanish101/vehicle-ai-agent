@@ -34,8 +34,12 @@ const PATTERNS = [
     re: /\bAKIA[0-9A-Z]{16}\b/,
   },
   {
+    name: "MongoDB connection string with credentials",
+    re: /mongodb(?:\+srv)?:\/\/[^\s'"]+:[^\s'"]+@/i,
+  },
+  {
     name: "Assigned secret env value",
-    re: /\b(?:GOOGLE_GENERATIVE_AI_API_KEY|GROQ_API_KEY|SESSION_SECRET|ZOHO_CLIENT_SECRET|ZOHO_REFRESH_TOKEN|ZOHO_CLIENT_ID)\s*[:=]\s*['"]?[^\s'"]{12,}/,
+    re: /\b(?:GOOGLE_GENERATIVE_AI_API_KEY|GROQ_API_KEY|OPENROUTER_API_KEY|SESSION_SECRET|ZOHO_CLIENT_SECRET|ZOHO_REFRESH_TOKEN|ZOHO_CLIENT_ID)\s*[:=]\s*['"]?[^\s'"]{12,}/,
   },
 ];
 

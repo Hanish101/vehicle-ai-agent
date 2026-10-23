@@ -2,8 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // Smaller image for Cloud Run / Docker (`node server.js` in .next/standalone).
-  output: "standalone",
+  // Vercel builds omit standalone; Docker / Cloud Run use it when VERCEL is unset.
+  ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
+  serverExternalPackages: ["mongodb"],
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

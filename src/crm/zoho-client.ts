@@ -14,7 +14,7 @@ import type {
   ServiceCaseInput,
   ServiceCaseRecord,
 } from "./types";
-import { normalizeTestDriveTime } from "@/lib/test-drive-time";
+import { demoScheduleLine, normalizeTestDriveTime } from "@/lib/test-drive-time";
 import { isAllocationStatus } from "./mock-client";
 
 function apiBase(): string {
@@ -313,7 +313,26 @@ export function createZohoClient(): CrmClient {
           "Leads",
           `(Phone:equals:${input.phone})`,
         );
+        const schedule = demoScheduleLine(input.demoDate, input.demoTime);
         if (existing) {
+          if (schedule) {
+            const previous =
+              typeof existing.Description === "string"
+                ? existing.Description.trim()
+                : "";
+            const description = previous
+              ? `${previous}\n${schedule}`
+              : schedule;
+            const updated = await zohoFetch(`/Leads/${existing.id}`, {
+              method: "PUT",
+              body: JSON.stringify({
+                data: [{ id: existing.id, Description: description }],
+              }),
+            });
+            if (!updated.ok) {
+              console.error("lead demo schedule update failed", updated.status);
+            }
+          }
           return ok({
             id: String(existing.id),
             firstName: String(existing.First_Name || input.firstName),
@@ -324,6 +343,8 @@ export function createZohoClient(): CrmClient {
             vehicleModel: String(
               existing[vehicleField()] || input.vehicleModel,
             ),
+            demoDate: input.demoDate,
+            demoTime: input.demoTime,
           } satisfies LeadRecord);
         }
 
@@ -337,6 +358,7 @@ export function createZohoClient(): CrmClient {
               Preferred_City: input.city,
               [vehicleField()]: input.vehicleModel,
               Lead_Source: "Chat",
+              ...(schedule ? { Description: schedule } : {}),
             },
           ],
         };

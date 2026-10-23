@@ -1,8 +1,25 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { getCrmClient } from "@/crm";
+import { normalizeTestDriveTime } from "@/lib/test-drive-time";
 import type { SessionData } from "@/session/types";
 import { toolsForSession, type ToolName } from "./stages";
+
+async function rememberDemo(
+  session: SessionData,
+  phrase?: string,
+): Promise<{ demoDate?: string; demoTime?: string }> {
+  const source =
+    phrase?.trim() ||
+    [session.demoDate, session.demoTime].filter(Boolean).join(" ");
+  if (!source) return {};
+  const normalized = normalizeTestDriveTime(source);
+  const demoDate = normalized.date || session.demoDate;
+  const demoTime = normalized.time || session.demoTime;
+  if (demoDate) session.demoDate = demoDate;
+  if (demoTime) session.demoTime = demoTime;
+  return { demoDate, demoTime };
+}
 
 function splitName(full: string): { firstName: string; lastName: string } {
   const parts = full.trim().split(/\s+/);
@@ -37,7 +54,7 @@ export function buildTools(session: SessionData): ToolSet {
   const all = {
     createLead: tool({
       description:
-        "Create a CRM lead after name, phone, email, and city are collected. Pass real values only — never placeholders like set or collected.",
+        "Create a CRM lead after name, phone, email, and city are collected. Pass real values only — never placeholders like set or collected. If the customer gave a demo date or time, pass it as testDriveTime (for example '27 Oct 10 am').",
       // Soft schema: reject placeholders in execute so bad model args do not hard-fail the stream.
       inputSchema: z.object({
         name: z.string().optional(),
@@ -45,6 +62,7 @@ export function buildTools(session: SessionData): ToolSet {
         email: z.string().optional(),
         city: z.string().optional(),
         vehicleModel: z.string().optional(),
+        testDriveTime: z.string().optional(),
       }),
       execute: async (input) => {
         if (!allowed.has("createLead")) {
@@ -58,6 +76,10 @@ export function buildTools(session: SessionData): ToolSet {
         const email = realSlot(input.email, session.email);
         const city = realSlot(input.city, session.city);
         const vehicleModel = realSlot(input.vehicleModel, session.vehicle);
+        const demo = await rememberDemo(
+          session,
+          realSlot(input.testDriveTime),
+        );
         const missing = [
           !(name && name.length >= 2) && "name",
           !(phone && phone.replace(/\D/g, "").length >= 10) && "phone",
@@ -79,6 +101,8 @@ export function buildTools(session: SessionData): ToolSet {
           email: email!,
           city: city!,
           vehicleModel: vehicleModel!,
+          demoDate: demo.demoDate,
+          demoTime: demo.demoTime,
         });
         if (result.ok) {
           session.leadId = result.data.id;
@@ -137,6 +161,7 @@ export function buildTools(session: SessionData): ToolSet {
         const result = await crm.updateFollowUp(input);
         if (result.ok) {
           session.dealId = result.data.id;
+          await rememberDemo(session, input.testDriveTime || input.notes);
         }
         return result;
       },

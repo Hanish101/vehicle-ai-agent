@@ -10,6 +10,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Mahindra OEM chat agent
 
-Four-stage automotive chat (Discover → Pipeline → Booking → Service). Groq primary, Gemini fallback. CRM via mock or Zoho behind a port. Session in a signed httpOnly cookie.
+Four-stage automotive chat (Discover → Pipeline → Booking → Service). LLM: Groq → OpenRouter → Gemini. CRM via mock or Zoho behind a port. Session in a signed httpOnly cookie.
 
 See `STATUS.md`, `docs/`, and `.cursor/rules/`.

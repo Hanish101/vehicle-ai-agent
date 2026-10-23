@@ -65,7 +65,7 @@ export function detectStageSwitch(
   const pipeline =
     /\b(quotation|quote|dealer|my deal|follow[- ]?up)\b/.test(t);
   const discover =
-    /\b(price|features|xuv700|thar|scorpio|new (car|suv)|interested in)\b/.test(
+    /\b(price|features|xuv|thar|scorpio|bolero|marazzo|3xo|roxx|ev|new (car|suv)|interested in)\b/.test(
       t,
     );
 

@@ -12,7 +12,7 @@ Copy `.env.example` → `.env.local` (or `.env`). Required for live CRM:
 - `ZOHO_ACCOUNTS_DOMAIN` (e.g. `https://accounts.zoho.in`)
 - `ZOHO_VEHICLE_FIELD` (default `Vehicle_Model`)
 
-Also set `GROQ_API_KEY` (primary) and optionally `GOOGLE_GENERATIVE_AI_API_KEY` (fallback), plus `SESSION_SECRET` (≥32 chars). Generate with `npm run secret`.
+Also set at least one LLM key (`GROQ_API_KEY`, `OPENROUTER_API_KEY`, or `GOOGLE_GENERATIVE_AI_API_KEY`), plus `SESSION_SECRET` (≥32 chars). Generate with `npm run secret`.
 
 ## Self client
 
@@ -40,6 +40,7 @@ Create before seeding (recommended; app has fallbacks if missing):
 | Module | API name | Notes |
 |---|---|---|
 | Leads | `Preferred_City` | text |
+| Leads | `Description` | Demo date and demo time are appended here (`Demo date: YYYY-MM-DD; Demo time: HH:MM`) |
 | Leads / Deals | `Vehicle_Model` (or your `ZOHO_VEHICLE_FIELD`) | text |
 | Deals | `Booking_ID` | text |
 | Deals | `Allocation_Status` | text: In Transit / Dispatch Pending / Delivered |

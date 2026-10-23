@@ -1,4 +1,5 @@
 import { runAgentTurn } from "@/agent/run";
+import { bindAccount, getCurrentUser } from "@/auth/current-user";
 import { rateLimit } from "@/lib/rate-limit";
 import { getSession } from "@/session/cookie";
 import type { SessionData } from "@/session/types";
@@ -6,9 +7,14 @@ import type { UIMessage } from "ai";
 
 export async function POST(req: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return Response.json({ error: "Sign in required" }, { status: 401 });
+    }
     const iron = await getSession();
     const session = iron as typeof iron & SessionData;
-    const limit = rateLimit(session.phone || "anon-session");
+    await bindAccount(session, user);
+    const limit = rateLimit(session.userId || "anon-session");
     if (!limit.ok) {
       return Response.json(
         {

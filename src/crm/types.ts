@@ -10,6 +10,10 @@ export type LeadInput = {
   email: string;
   city: string;
   vehicleModel: string;
+  /** YYYY-MM-DD */
+  demoDate?: string;
+  /** HH:MM */
+  demoTime?: string;
 };
 
 export type LeadRecord = LeadInput & { id: string };

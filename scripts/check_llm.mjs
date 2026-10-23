@@ -11,6 +11,7 @@ const root = join(here, "..");
 // Keep in sync with src/agent/model.ts
 const GEMINI_MODEL = "gemini-3.5-flash";
 const GROQ_MODEL = "openai/gpt-oss-120b";
+const OPENROUTER_MODEL_DEFAULT = "meta-llama/llama-3.3-70b-instruct:free";
 const TIMEOUT_MS = 20_000;
 
 function loadEnvFile(path) {
@@ -133,6 +134,35 @@ async function checkGroq(apiKey) {
   }
 }
 
+async function checkOpenRouter(apiKey) {
+  const model =
+    process.env.OPENROUTER_MODEL?.trim() || OPENROUTER_MODEL_DEFAULT;
+  const json = await request(
+    "https://openrouter.ai/api/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "user", content: "Reply with the single word OK." }],
+        max_tokens: 64,
+      }),
+    },
+    [apiKey],
+  );
+  const choice = json?.choices?.[0];
+  const text = choice?.message?.content?.trim();
+  if (!text) {
+    throw new Error(
+      `HTTP 200 but empty text (finish=${choice?.finish_reason ?? "unknown"})`,
+    );
+  }
+  return { model, text };
+}
+
 async function run(name, envName, fn) {
   const apiKey = process.env[envName];
   if (!apiKey) {
@@ -155,18 +185,20 @@ async function run(name, envName, fn) {
   }
 }
 
-const groqOk = await run("Groq (primary)", "GROQ_API_KEY", checkGroq);
+const groqOk = await run("Groq", "GROQ_API_KEY", checkGroq);
+const openRouterOk = await run(
+  "OpenRouter",
+  "OPENROUTER_API_KEY",
+  checkOpenRouter,
+);
 const googleOk = await run(
-  "Google Gemini (fallback)",
+  "Google Gemini",
   "GOOGLE_GENERATIVE_AI_API_KEY",
   checkGoogle,
 );
 
-// Groq is primary. Gemini is optional fallback — exit 0 if either works.
-if (groqOk) {
-  process.exitCode = 0;
-} else if (googleOk) {
-  console.log("Primary Groq unavailable; Gemini fallback is reachable.");
+// Exit 0 if any configured provider works (order matches resolveModel).
+if (groqOk || openRouterOk || googleOk) {
   process.exitCode = 0;
 } else {
   process.exitCode = 1;
